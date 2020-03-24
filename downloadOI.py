@@ -8,14 +8,15 @@ import subprocess
 import os
 from tqdm import tqdm
 import multiprocessing
-from multiprocessing import Pool as thread_pool
+from multiprocessing import Pool
 
 cpu_count = multiprocessing.cpu_count()
+print(f"CPU count: {cpu_count}")
 
 parser = argparse.ArgumentParser(description="Download Class specific images from OpenImagesV5")
 parser.add_argument("--dataset", help="Dataset category - train, validation or test", required=True)
 parser.add_argument("--classes", help="Names of object classes to be downloaded", required=True)
-parser.add_argument("--nthreads", help="Number of threads to use", required=False, type=int, default=cpu_count*2)
+parser.add_argument("--nthreads", help="Number of threads to use", required=False, type=int, default=cpu_count)
 parser.add_argument("--occluded", help="Include occluded images", required=False, type=int, default=1)
 parser.add_argument("--truncated", help="Include truncated images", required=False, type=int, default=1)
 parser.add_argument("--groupOf", help="Include groupOf images", required=False, type=int, default=1)
@@ -26,7 +27,7 @@ args = parser.parse_args()
 
 dataset = args.dataset
 
-threads = args.nthreads
+threads = args.nthreads 
 
 classes = []
 for class_name in args.classes.split(','):
@@ -43,23 +44,23 @@ subprocess.run(["rm", "-rf", dataset])
 # Make directory for target images (directory will be named after target dataset, e.g. "validation")
 subprocess.run(["mkdir", dataset])
 
-pool = thread_pool(threads)
+pool = Pool(threads)
 commands = []
 cnt = 0
 
 for ind in range(0, len(classes)):
     
     class_name = classes[ind]
-    print("Class "+str(ind) + " : " + class_name)
+    print("Downloading class " + str(ind) + ": " + class_name)
     
     # Match ClassID to annotations information
     command = "grep "+ dict_list[class_name.replace("_", " ")] + " ./" + dataset + "-annotations-bbox.csv"
-    
+    print(command)
     # Image annotations from annotations CSV
     image_annotations = subprocess.run(command.split(), stdout=subprocess.PIPE).stdout.decode('utf-8')
-    print(f"Class annotations 1: {image_annotations}")
+    #print(f"Class annotations 1: {image_annotations}")
     image_annotations = image_annotations.splitlines()
-    print(f"Class annotations 2: {image_annotations}")
+    #print(f"Class annotations 2: {image_annotations}")
     
     for line in image_annotations:
         line_parts = line.split(',')
@@ -85,7 +86,7 @@ for ind in range(0, len(classes)):
         
         # Download image from S3 and save it to dataset folder such as "validation/0b6227bb06345402.jpg"
         command = 'aws s3 --no-sign-request --only-show-errors cp s3://open-images-dataset/'+dataset+'/'+line_parts[0]+'.jpg '+ dataset+'/'+line_parts[0]+'.jpg'
-        print(f"Command 2: {command}")
+        #print(f"Command 2: {command}")
         commands.append(command)
         
 #         with open('%s/%s/%s.txt'%(dataset,class_name,line_parts[0]),'a') as f:
@@ -95,10 +96,7 @@ for ind in range(0, len(classes)):
 commands = list(set(commands))
 print(f"Downloading: {str(len(commands))} images | Num classes: {len(classes)} | Dataset: {dataset}")
 
-list(tqdm(pool.imap(os.system, commands), total = len(commands)))
-
-pool.close()
-pool.join()
-
-
-
+if __name__ == "__main__":
+    list(tqdm(pool.imap(os.system, commands), total = len(commands)))
+    pool.close()
+    pool.join()
