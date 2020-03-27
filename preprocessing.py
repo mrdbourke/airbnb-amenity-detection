@@ -99,7 +99,8 @@ def get_image_dicts(image_folder, annotation_file, target_classes=None):
     image_folder (str): target folder containing images
     annotations (DataFrame): DataFrame of image label data
     """
-    dataset_name = "validation" if "valid" in image_folder else "train"
+    # Get name of dataset from image_folder 
+    dataset_name = str(image_folder)
 
     print(f"Using {annotation_file} for annotations...")
     # TODO: there should be some kind of asssertions here making sure the image folder and annotation files match
