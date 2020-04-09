@@ -146,9 +146,13 @@ ipython_config.py
 #
 ## End of https://www.gitignore.io/api/jupyternotebooks
 
+# Extras
 .zip
 data
 aws
 learnopencv
 tutorials
-
+.pth
+.DS_store
+.DS_Store
+.gcloudignore
