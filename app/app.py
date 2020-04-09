@@ -57,7 +57,7 @@ def create_predictor(model_config, model_weights, threshold):
     Loads a Detectron2 model based on model_config, model_weights and creates a default
     Detectron2 predictor.
 
-    Returns the config.
+    Returns the a Detectron2 default predictor.
     """
     cfg = get_cfg()
     cfg.merge_from_file(model_config)
@@ -68,7 +68,7 @@ def create_predictor(model_config, model_weights, threshold):
 
     predictor = DefaultPredictor(cfg)
 
-    return cfg, predictor
+    return predictor
 
 # Inference function - TODO this could probably be abstracted somewhere else... 
 from detectron2.engine import DefaultPredictor
@@ -91,9 +91,7 @@ def make_inference(image, model_config, model_weights, threshold=0.5, n=5, save=
   save (bool) : if True will save image with predicted instances to file, default False
   """
   # Create predictor
-  cfg, predictor = create_predictor(model_config, model_weights, threshold)
-
-  cfg.MODEL.SCORE_THRESH_TEST = threshold
+  predictor = create_predictor(model_config, model_weights, threshold)
 
   # Convert PIL image to array
   image = np.asarray(image)
@@ -116,22 +114,18 @@ def make_inference(image, model_config, model_weights, threshold=0.5, n=5, save=
 
 def main():
     st.title("Airbnb Amenity Detection 👁")
-    # TODO: Add a little more Readme style code here 
     st.write("This application replicates [Airbnb's machine learning powered amenity detection](https://medium.com/airbnb-engineering/amenity-detection-and-beyond-new-frontiers-of-computer-vision-at-airbnb-144a4441b72e).")
-    # TODO: Update with examples and more intuition about the app...
     st.write("## How does it work?")
     st.write("Add an image of a room and a machine learning learning model will look at it and find the amenities like the example below:")
     st.image(Image.open("images/example-amenity-detection.png"), 
              caption="Example of model being run on a bedroom.", 
              use_column_width=True)
-
     st.write("## Upload your own image")
     st.write("**Note:** The model has been trained on typical household rooms and therefore will only with those kind of images.")
     uploaded_image = st.file_uploader("Choose a png or jpg image", 
                                       type=["jpg", "png", "jpeg"])
-    
+
     if uploaded_image is not None:
-        #st.write(uploaded_image)
         image = Image.open(uploaded_image)
         st.image(image, caption="Uploaded Image.", use_column_width=True)
         
@@ -164,12 +158,12 @@ def main():
           st.write("Amenities detected:")
           st.write([subset[i] for i in classes])
         
-        st.write("## How is this made?")
-        st.write("The machine learning happens with a fine-tuned [Detectron2](https://detectron2.readthedocs.io/) model (PyTorch), \
-        this front end (what you're reading) is built with [Streamlit](https://www.streamlit.io/) \
-        and it's all hosted on [Google's App Engine](https://cloud.google.com/appengine/).")
-        st.write("See the [code on GitHub](https://github.com/mrdbourke/airbnb-object-detection) and a [YouTube playlist](https://www.youtube.com/playlist?list=PL6vjgQ2-qJFeMrZ0sBjmnUBZNX9xaqKuM) detailing more below.")
-        st.video("https://youtu.be/C_lIenSJb3c")
+    st.write("## How is this made?")
+    st.write("The machine learning happens with a fine-tuned [Detectron2](https://detectron2.readthedocs.io/) model (PyTorch), \
+    this front end (what you're reading) is built with [Streamlit](https://www.streamlit.io/) \
+    and it's all hosted on [Google's App Engine](https://cloud.google.com/appengine/).")
+    st.write("See the [code on GitHub](https://github.com/mrdbourke/airbnb-object-detection) and a [YouTube playlist](https://www.youtube.com/playlist?list=PL6vjgQ2-qJFeMrZ0sBjmnUBZNX9xaqKuM) detailing more below.")
+    st.video("https://youtu.be/C_lIenSJb3c")
 
 if __name__ == "__main__":
     main()
