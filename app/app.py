@@ -57,7 +57,7 @@ def create_predictor(model_config, model_weights, threshold):
     Loads a Detectron2 model based on model_config, model_weights and creates a default
     Detectron2 predictor.
 
-    Returns the a Detectron2 default predictor.
+    Returns Detectron2 default predictor and model config.
     """
     cfg = get_cfg()
     cfg.merge_from_file(model_config)
@@ -68,7 +68,7 @@ def create_predictor(model_config, model_weights, threshold):
 
     predictor = DefaultPredictor(cfg)
 
-    return predictor
+    return cfg, predictor
 
 # Inference function - TODO this could probably be abstracted somewhere else... 
 from detectron2.engine import DefaultPredictor
@@ -90,8 +90,8 @@ def make_inference(image, model_config, model_weights, threshold=0.5, n=5, save=
     n=5 means the top 5 instances above the threshold will be drawn on.
   save (bool) : if True will save image with predicted instances to file, default False
   """
-  # Create predictor
-  predictor = create_predictor(model_config, model_weights, threshold)
+  # Create predictor and model config
+  cfg, predictor = create_predictor(model_config, model_weights, threshold)
 
   # Convert PIL image to array
   image = np.asarray(image)
